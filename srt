@@ -1,0 +1,55 @@
+#!/usr/bin/env ruby
+
+require 'srt'
+require 'cgi'
+require 'json'
+require 'thor'
+
+class TranslateSubs < Thor
+  desc 'translate SRT', 'translate SRT from English (source language) to Thai (translation language)'
+
+  option :combined, type: :boolean
+  option :sl, default: 'en'
+  option :tl, default: 'th'
+
+  def translate(srt_file)
+    STDERR.puts "Translating srt: #{srt_file}"
+
+    if options[:combined]
+      STDERR.puts "#{options[:sl]} & #{options[:tl]}"
+    else
+      STDERR.puts "#{options[:sl]} -> #{options[:tl]}"
+    end
+
+    srt = parse srt_file
+
+    STDOUT.puts process(srt).to_s
+  end
+
+  no_commands do
+    def parse(srt)
+      SRT::File.parse File.read srt
+    end
+
+    def process(srt)
+      srt.lines.each do |srt_line|
+        translated_text_lines = srt_line.text.map do |text|
+          encoded_text = CGI.escape text
+          STDERR.puts "[#{srt_line.sequence}] Translating...: #{encoded_text}"
+          url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=#{sl}&tl=#{tl}&dt=t&q=#{encoded_text}"
+          response = `curl -s '#{url}'`
+          JSON.parse(response).first.first.first
+        end
+        STDERR.puts translated_text_lines
+        if options[:combined]
+          srt_line.text += translated_text_lines
+        else
+          srt_line.text = translated_text_lines
+        end
+      end
+      srt
+    end
+  end
+end
+
+TranslateSubs.start ARGV
