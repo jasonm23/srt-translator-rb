@@ -6,7 +6,7 @@ require 'json'
 require 'thor'
 
 class TranslateSubs < Thor
-  desc 'translate SRT', 'translate SRT from English (source language) to Thai (translation language)'
+  desc 'translate SRT', 'translate SRT from (source language) to (translation language) (Default: en -> th)'
 
   option :combined, type: :boolean
   option :sl, default: 'en'
