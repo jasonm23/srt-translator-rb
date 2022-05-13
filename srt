@@ -4,6 +4,7 @@ require 'srt'
 require 'cgi'
 require 'json'
 require 'thor'
+require 'net/http'
 
 class TranslateSubs < Thor
   desc 'translate SRT_FILE', "translate SRT_FILE from (source language) to (translation language) (Default: en -> th)"
@@ -31,22 +32,30 @@ class TranslateSubs < Thor
       SRT::File.parse File.read srt
     end
 
+    def google_translate_request(text)
+      encoded_text = CGI.escape text
+      STDERR.puts "[#{srt_line.sequence}] Translating...: #{encoded_text}"
+      url = URI("https://translate.googleapis.com/translate_a/single?client=gtx&sl=#{sl}&tl=#{tl}&dt=t&q=#{encoded_text}")
+      response = Net::HTTP.get url
+      JSON.parse(response).first.first.first
+    end
+
     def process(srt)
+      # Modify srt structure in place
       srt.lines.each do |srt_line|
         translated_text_lines = srt_line.text.map do |text|
-          encoded_text = CGI.escape text
-          STDERR.puts "[#{srt_line.sequence}] Translating...: #{encoded_text}"
-          url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=#{sl}&tl=#{tl}&dt=t&q=#{encoded_text}"
-          response = `curl -s '#{url}'`
-          JSON.parse(response).first.first.first
+          google_translate_request(text)
         end
+
         STDERR.puts translated_text_lines
+
         if options[:combined]
           srt_line.text += translated_text_lines
         else
           srt_line.text = translated_text_lines
         end
       end
+      # Return the modified srt
       srt
     end
   end
