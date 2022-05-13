@@ -5,6 +5,11 @@ require 'cgi'
 require 'json'
 require 'thor'
 require 'net/http'
+require 'progress_bar'
+
+class Array
+  include ProgressBar::WithProgress
+end
 
 class TranslateSubs < Thor
   desc 'translate SRT_FILE', "translate SRT_FILE from (source language) to (translation language) (Default: en -> th)"
@@ -32,9 +37,12 @@ class TranslateSubs < Thor
       SRT::File.parse File.read srt
     end
 
-    def google_translate_request(text)
+    def google_translate(text)
       encoded_text = CGI.escape text
-      STDERR.puts "[#{srt_line.sequence}] Translating...: #{encoded_text}"
+
+      sl = options[:sl]
+      tl = options[:tl]
+
       url = URI("https://translate.googleapis.com/translate_a/single?client=gtx&sl=#{sl}&tl=#{tl}&dt=t&q=#{encoded_text}")
       response = Net::HTTP.get url
       JSON.parse(response).first.first.first
@@ -42,12 +50,10 @@ class TranslateSubs < Thor
 
     def process(srt)
       # Modify srt structure in place
-      srt.lines.each do |srt_line|
+      srt.lines.each_with_progress do |srt_line|
         translated_text_lines = srt_line.text.map do |text|
-          google_translate_request(text)
+          google_translate(text)
         end
-
-        STDERR.puts translated_text_lines
 
         if options[:combined]
           srt_line.text += translated_text_lines
@@ -55,6 +61,7 @@ class TranslateSubs < Thor
           srt_line.text = translated_text_lines
         end
       end
+
       # Return the modified srt
       srt
     end
