@@ -12,7 +12,7 @@ class Array
 end
 
 class TranslateSubs < Thor
-  desc 'translate SRT_FILE', "translate SRT_FILE from (source language) to (translation language) (Default: en -> th)"
+  desc 'translate SRT_FILE', 'translate SRT_FILE from (source language) to (translation language) (Default: en -> th)'
 
   option :combined, type: :boolean
   option :sl, default: 'en'
