@@ -34,7 +34,13 @@ class TranslateSubs < Thor
 
   no_commands do
     def parse(srt)
-      SRT::File.parse File.read srt
+      string = File.read srt
+
+      # Force UTF8
+      encoding_options = {invalid: :replace, undef: :replace, replace: ''}
+      utf8 = string.encode(Encoding.find('UTF-8'), **encoding_options)
+
+      SRT::File.parse utf8
     end
 
     def google_translate(text)
