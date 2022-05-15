@@ -6,14 +6,15 @@ require 'json'
 require 'thor'
 require 'net/http'
 require 'progress_bar'
+require 'pry-byebug'
 
 class Array
   include ProgressBar::WithProgress
 end
 
 class TranslateSubs < Thor
-  desc 'translate SRT_FILE', 'translate SRT_FILE from (source language) to (translation language) (Default: en -> th)'
 
+  desc 'translate SRT_FILE', 'translate SRT_FILE from (source language) to (translation language) (Default: en -> th)'
   option :combined, type: :boolean
   option :sl, default: 'en'
   option :tl, default: 'th'
@@ -29,7 +30,24 @@ class TranslateSubs < Thor
 
     srt = parse srt_file
 
-    STDOUT.puts process(srt).to_s
+    translated = process(srt)
+
+    STDOUT.puts translated.to_s
+  end
+
+  desc 'check SRT_FILE', 'check SRT_FILE for errors'
+
+  def check(srt_file)
+    srt = SRT::File.parse(File.read(srt_file))
+    sequnce_error = srt.has_sequence_error?
+
+    if sequnce_error
+      STDERR.puts "Checked #{srt_file}"
+      STDERR.puts "❌ #{sequnce_error}"
+    else
+      STDERR.puts "Checked #{srt_file}"
+      STDERR.puts "✅ Ok"
+    end
   end
 
   no_commands do
