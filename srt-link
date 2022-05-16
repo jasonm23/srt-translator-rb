@@ -1,0 +1,3 @@
+DIR="$(dirname "$(readlink -n "$0")")"
+
+BUNDLE_GEMFILE="${DIR}/Gemfile" bundle exec "${DIR}/srt" "$@"
