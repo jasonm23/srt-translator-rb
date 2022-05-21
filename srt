@@ -13,6 +13,29 @@ class Array
 end
 
 class TranslateSubs < Thor
+  desc "frameshift SRT_FILE FROM TO", "Shift the SRT_FILE framerate FROM TO. [e.g. '25fps' '29.97fps'])"
+
+  def frameshift(srt_file, from_fps, to_fps)
+    STDERR.puts "Frame shifting #{srt_file} from #{from_fps} to #{to_fps}"
+
+    srt = parse srt_file
+
+    srt.timeshift({ from_fps => to_fps })
+
+    STDOUT.puts srt.to_s
+  end
+
+  desc "timeshift SRT_FILE TIME", "timeshift the SRT_FILE by TIME [e.g. '+2.5s', '-5s']"
+
+  def timeshift(srt_file, time)
+    STDERR.puts "Time shifting #{srt_file} by #{time}"
+
+    srt = parse srt_file
+
+    srt.timeshift all: time
+
+    STDOUT.puts srt.to_s
+  end
 
   desc 'translate SRT_FILE', 'translate SRT_FILE from (source language) to (translation language) (Default: en -> th)'
   option :combined, type: :boolean
@@ -38,7 +61,10 @@ class TranslateSubs < Thor
   desc 'check SRT_FILE', 'check SRT_FILE for errors'
 
   def check(srt_file)
-    srt = SRT::File.parse(File.read(srt_file))
+    srt = parse srt_file
+
+    binding.pry
+
     sequnce_error = srt.has_sequence_error?
 
     if sequnce_error
