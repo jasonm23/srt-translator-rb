@@ -1,0 +1,104 @@
+#compdef srt
+# shellcheck disable=SC2034
+# https://github.com/koalaman/shellcheck/wiki/SC2034
+
+_srt() {
+  __srt
+}
+
+__srt() {
+  readonly local DEPTH=2
+
+  case $CURRENT in
+    "$DEPTH")
+      _arguments \
+        '*: :->subcommands'
+
+      case ${state:?} in
+        subcommands)
+          _values \
+            'subcommand' \
+            'frameshift' \
+            'timeshift' \
+            'translate' \
+            'check' \
+            ;
+          ;;
+      esac
+      ;;
+    *)
+      case ${words[$DEPTH]:?} in
+        frameshift)
+          __srt_frameshift
+          ;;
+        timeshift)
+          __srt_timeshift
+          ;;
+        translate)
+          __srt_translate
+          ;;
+        check)
+          __srt_check
+          ;;
+        *)
+          # if does not match any subcommand
+          # complete rest arguments
+          _files
+          ;;
+      esac
+      ;;
+  esac
+}
+
+__srt_frameshift() {
+  _arguments \
+    '*: :->rest'
+
+  case ${state:?} in
+    rest)
+      # complete rest arguments
+      _files
+      ;;
+  esac
+}
+
+__srt_timeshift() {
+  _arguments \
+    '*: :->rest'
+
+  case ${state:?} in
+    rest)
+      # complete rest arguments
+      _files
+      ;;
+  esac
+}
+
+__srt_translate() {
+  _arguments \
+    --combined \
+    --sl \
+    --tl \
+    '*: :->rest'
+
+  case ${state:?} in
+    rest)
+      # complete rest arguments
+      _files
+      ;;
+  esac
+}
+
+__srt_check() {
+  _arguments \
+    '*: :->rest'
+
+  case ${state:?} in
+    rest)
+      # complete rest arguments
+      _files
+      ;;
+  esac
+}
+
+compdef _srt srt

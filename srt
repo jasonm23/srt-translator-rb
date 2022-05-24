@@ -6,13 +6,13 @@ require 'json'
 require 'thor'
 require 'net/http'
 require 'progress_bar'
-require 'pry-byebug'
 
 class Array
   include ProgressBar::WithProgress
 end
 
 class TranslateSubs < Thor
+
   desc "frameshift SRT_FILE FROM TO", "Shift the SRT_FILE framerate FROM TO. [e.g. '25fps' '29.97fps'])"
 
   def frameshift(srt_file, from_fps, to_fps)
@@ -77,6 +77,10 @@ class TranslateSubs < Thor
   end
 
   no_commands do
+    def exit_on_failure?
+      exit 1
+    end
+
     def parse(srt)
       string = File.read srt
 
