@@ -23,5 +23,8 @@ DEPENDENCIES
   srt!
   thor
 
+RUBY VERSION
+   ruby 2.7.1p83
+
 BUNDLED WITH
    2.1.4
