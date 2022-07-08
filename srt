@@ -58,24 +58,6 @@ class TranslateSubs < Thor
     STDOUT.puts translated.to_s
   end
 
-  desc 'check SRT_FILE', 'check SRT_FILE for errors'
-
-  def check(srt_file)
-    srt = parse srt_file
-
-    binding.pry
-
-    sequnce_error = srt.has_sequence_error?
-
-    if sequnce_error
-      STDERR.puts "Checked #{srt_file}"
-      STDERR.puts "❌ #{sequnce_error}"
-    else
-      STDERR.puts "Checked #{srt_file}"
-      STDERR.puts "✅ Ok"
-    end
-  end
-
   no_commands do
     def exit_on_failure?
       exit 1

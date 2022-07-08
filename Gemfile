@@ -2,10 +2,6 @@
 
 source "https://rubygems.org"
 
-ruby '2.7.1'
-
-git_source(:github) {|repo_name| "https://github.com/#{repo_name}" }
-
-gem 'srt', git: 'https://github.com/codefodder/srt', branch: 'main'
+gem 'srt'
 gem 'thor'
 gem 'progress_bar'
