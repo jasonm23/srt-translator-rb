@@ -11,6 +11,16 @@ class Array
   include ProgressBar::WithProgress
 end
 
+class ProgressBar
+  def render_bar
+    return "" if bar_width < 2
+
+    progress_width = (ratio * (bar_width - 2)).floor
+    remainder_width = bar_width - 2 - progress_width
+    "[#{'■' * progress_width}#{' ' * remainder_width}]"
+  end
+end
+
 class TranslateSubs < Thor
 
   desc "frameshift SRT_FILE FROM TO", "Shift the SRT_FILE framerate FROM TO. [e.g. '25fps' '29.97fps'])"
