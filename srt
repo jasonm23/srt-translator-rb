@@ -13,11 +13,9 @@ end
 
 class ProgressBar
   def render_bar
-    return "" if bar_width < 2
-
-    progress_width = (ratio * (bar_width - 2)).floor
-    remainder_width = bar_width - 2 - progress_width
-    "[#{'■' * progress_width}#{' ' * remainder_width}]"
+    progress_percent = @count.to_f / @max.to_f
+    _ = %x{osascript -e 'tell application "Progression" to progressvalue in "#{progress_percent}"'}
+    nil
   end
 end
 
