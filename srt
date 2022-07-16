@@ -14,7 +14,7 @@ end
 class ProgressBar
   def render_bar
     progress_percent = @count.to_f / @max.to_f
-    _ = %x{osascript -e 'tell application "Progression" to progressvalue in "#{progress_percent}"'}
+    _ = %x{osascript -e 'tell application "Progression" to update progress "#{progress_percent}"'}
     nil
   end
 end
