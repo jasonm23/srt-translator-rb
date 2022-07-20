@@ -14,7 +14,7 @@ end
 class ProgressBar
   def render_bar
     progress_percent = @count.to_f / @max.to_f
-    _ = %x{osascript -e 'tell application "Progression" to update progress "#{progress_percent}"'}
+    _ = %x{osascript -e 'tell application "Progression" to update eta "#{format_interval(eta)}" progress #{progress_percent}'}
     nil
   end
 end
@@ -23,10 +23,10 @@ class TranslateSubs < Thor
 
   desc "frameshift SRT_FILE FROM TO", "Shift the SRT_FILE framerate FROM TO. [e.g. '25fps' '29.97fps'])"
 
-  def frameshift(srt_file, from_fps, to_fps)
-    STDERR.puts "Frame shifting #{srt_file} from #{from_fps} to #{to_fps}"
+  def frameshift(srt_filename, from_fps, to_fps)
+    STDERR.puts "Frame shifting #{srt_filename} from #{from_fps} to #{to_fps}"
 
-    srt = parse srt_file
+    srt = parse srt_filename
 
     srt.timeshift({ from_fps => to_fps })
 
@@ -35,31 +35,32 @@ class TranslateSubs < Thor
 
   desc "timeshift SRT_FILE TIME", "timeshift the SRT_FILE by TIME [e.g. '+2.5s', '-5s']"
 
-  def timeshift(srt_file, time)
-    STDERR.puts "Time shifting #{srt_file} by #{time}"
+  def timeshift(srt_filename, time)
+    STDERR.puts "Time shifting #{srt_filename} by #{time}"
 
-    srt = parse srt_file
+    srt = parse srt_filename
 
     srt.timeshift all: time
 
     STDOUT.puts srt.to_s
   end
 
-  desc 'translate SRT_FILE', 'translate SRT_FILE from (source language) to (translation language) (Default: en -> th)'
+  desc 'translate SRT_FILE', 'translate SRT_FILE from (source language) to (translation language) (Default: en  ⟹  th)'
   option :combined, type: :boolean
   option :sl, default: 'en'
   option :tl, default: 'th'
 
-  def translate(srt_file)
-    STDERR.puts "Translating srt: #{srt_file}"
+  def translate(srt_filename)
+    STDERR.puts "Translating srt: #{srt_filename}"
+    _ = %x{osascript -e 'tell application "Progression" to update message "English  ⟹  Thai" title "#{clean srt_filename}"' }
 
     if options[:combined]
       STDERR.puts "#{options[:sl]} & #{options[:tl]}"
     else
-      STDERR.puts "#{options[:sl]} -> #{options[:tl]}"
+      STDERR.puts "#{options[:sl]}  ⟹  #{options[:tl]}"
     end
 
-    srt = parse srt_file
+    srt = parse srt_filename
 
     translated = process(srt)
 
@@ -71,11 +72,19 @@ class TranslateSubs < Thor
       exit 1
     end
 
+    def clean(path)
+      basename = File.basename path
+      basename.sub(/[.].*?[.].*?$/,"")
+    end
+
     def parse(srt)
       string = File.read srt
 
       # Force UTF8
-      encoding_options = {invalid: :replace, undef: :replace, replace: ''}
+      encoding_options = {invalid: :replace,
+                          undef: :replace,
+                          replace: ''}
+
       utf8 = string.encode(Encoding.find('UTF-8'), **encoding_options)
 
       SRT::File.parse utf8
