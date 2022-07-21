@@ -1,10 +1,11 @@
 #!/usr/bin/env ruby
 
-require 'srt'
 require 'cgi'
 require 'json'
-require 'thor'
 require 'net/http'
+
+require 'srt'
+require 'thor'
 require 'progress_bar'
 
 class Array
@@ -67,6 +68,14 @@ class TranslateSubs < Thor
     STDOUT.puts translated.to_s
   end
 
+  desc 'text TEXT', 'translate TEXT from -sl to -tl. (Default: en  ⟹  th)'
+  option :sl, default: 'en'
+  option :tl, default: 'th'
+
+  def text(text)
+    STDOUT.puts google_translate text
+  end
+
   no_commands do
     def exit_on_failure?
       exit 1
@@ -74,7 +83,7 @@ class TranslateSubs < Thor
 
     def clean(path)
       basename = File.basename path
-      basename.sub(/[.].*?[.].*?$/,"")
+      basename.sub(/[.][^.]*?[.][^.]*?$/,"")
     end
 
     def parse(srt)
